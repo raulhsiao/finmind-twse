@@ -1,0 +1,50 @@
+{
+  "name": "uv-finmind-dev",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+
+  "initializeCommand": "${localWorkspaceFolder}/.devcontainer/initializeCommand.sh ${localWorkspaceFolder}/.devcontainer",
+  "runArgs": [
+      "--env-file",
+      "${localWorkspaceFolder}/.devcontainer/.env"
+  ],
+
+  // ---- Run as non-root vscode user ----
+  "remoteUser": "vscode",
+  "containerUser": "vscode",
+  "updateRemoteUserUID": true,
+
+  // ---- Workspace folder inside container ----
+  "workspaceFolder": "/finmind",
+  "workspaceMount": "source=/opt/workspace/finmind-dev,target=/finmind,type=bind,consistency=cached",
+
+  "mounts": [
+      "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached",
+      "source=${localWorkspaceFolder}/.cline,target=/home/vscode/.cline,type=bind,consistency=cached",
+      "source=${localEnv:HOME}/.claude,target=/home/vscode/.claude,type=bind,consistency=cached",
+      "source=${localEnv:HOME}/.claude.json,target=/home/vscode/.claude.json,type=bind,consistency=cached"
+  ],
+
+  // ---- Forward Jupyter Lab port ----
+  "forwardPorts": [28888],
+  "portsAttributes": {
+      "28888": {
+          "label": "Jupyter Lab",
+          "onAutoForward": "notify"
+      }
+  },
+  "postCreateCommand": "${containerWorkspaceFolder}/.devcontainer/postCreateCommand.sh ${containerWorkspaceFolder}",
+  "postStartCommand": "${containerWorkspaceFolder}/.devcontainer/postStartCommand.sh ${containerWorkspaceFolder} finmind 28888",
+
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "python.defaultInterpreterPath": "finmind/bin/python"
+      },
+      "extensions": [
+        "saoudrizwan.claude-dev"
+      ]
+    }
+  }
+}
