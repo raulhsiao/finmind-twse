@@ -62,7 +62,7 @@
 				],
         "terminal.integrated.env.linux": {
             "VIRTUAL_ENV": "/workspace/finmind",
-            "PATH": "/workspace/finmind/bin:${env:PATH}"
+            "PATH": "~/.local/bin:/workspace/finmind/bin:${env:PATH}"
         },
         "terminal.integrated.defaultProfile.linux": "bash",
         "python.defaultInterpreterPath": "/workspace/finmind/bin/python",
