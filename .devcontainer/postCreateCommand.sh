@@ -17,3 +17,7 @@ echo "[startup] Using current path: $DEVC_VENV_PATH"
 # Each process when every time devcontainer creating
 .devcontainer/InitFinmind.sh
 .devcontainer/InitGitEnv.sh
+
+mkdir -p ~/.claude/commands
+curl -o ~/.claude/commands/finmind.md \
+  https://raw.githubusercontent.com/FinMind/FinMind/master/.claude/commands/finmind.md
