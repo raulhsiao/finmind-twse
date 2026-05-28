@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 LOG_FILE="${HOME}/jupyter_lab.log"
 
@@ -21,3 +20,9 @@ echo "[startup] Using current path: $DEVC_VENV_PATH"
 mkdir -p ~/.claude/commands
 curl -o ~/.claude/commands/finmind.md \
   https://raw.githubusercontent.com/FinMind/FinMind/master/.claude/commands/finmind.md
+
+mkdir -p /workspace/packages
+pushd /workspace/packages
+git clone https://github.com/FinMind/FinMind.git
+git branch
+popd

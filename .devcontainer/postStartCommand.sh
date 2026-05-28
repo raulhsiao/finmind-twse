@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 LOG_FILE="${HOME}/jupyter_lab.log"
 
