@@ -26,8 +26,8 @@
   "updateRemoteUserUID": true,
 
   // ---- Workspace folder inside container ----
-  "workspaceFolder": "/finmind",
-  "workspaceMount": "source=/opt/workspace/finmind-dev,target=/finmind,type=bind,consistency=cached",
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=/opt/workspace/finmind-dev,target=/workspace,type=bind,consistency=cached",
 
   "mounts": [
       "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached",
@@ -60,8 +60,13 @@
 					{ "name": "CLAUDE_CODE_ATTRIBUTION_HEADER", "value": "0" },
 					{ "name": "DISABLE_PROMPT_CACHING", "value": "0" }
 				],
-
-        "python.defaultInterpreterPath": "finmind/bin/python"
+        "terminal.integrated.env.linux": {
+            "VIRTUAL_ENV": "/workspace/finmind",
+            "PATH": "/workspace/finmind/bin:${env:PATH}"
+        },
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "python.defaultInterpreterPath": "/workspace/finmind/bin/python",
+        "python.terminal.activateEnvInCurrentTerminal": true
       },
       "extensions": [
         "mhutchie.git-graph",
