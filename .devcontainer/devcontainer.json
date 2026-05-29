@@ -40,7 +40,7 @@
 
 	"containerEnv": {
     // 導入環境變數 (如果需要在容器內部直接定義環境變數，可以在這裡添加)    
-    "CLAUDE_CONFIG_DIR": "/home/raul/.claude",
+    "CLAUDE_CONFIG_DIR": "/home/vscode/.claude",
 		"ANTHROPIC_AUTH_TOKEN": "ollama",
 		"ANTHROPIC_MODEL": "qwen3.5:397b-cloud",
 		"ANTHROPIC_API_KEY": "",
