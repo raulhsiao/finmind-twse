@@ -6,19 +6,10 @@
 
   "initializeCommand": "${localWorkspaceFolder}/.devcontainer/initializeCommand.sh ${localWorkspaceFolder}/.devcontainer",
   "runArgs": [
+      // 以檔案方式批次導入環境變數
       "--env-file",
       "${localWorkspaceFolder}/.devcontainer/.env"
   ],
-	"containerEnv": {
-    	// "CLAUDE_CONFIG_DIR": "/home/raul/.claude",
-		"ANTHROPIC_AUTH_TOKEN": "ollama",
-		"ANTHROPIC_MODEL": "minimax-m2.7:cloud",
-		"ANTHROPIC_API_KEY": "",
-		"ANTHROPIC_BASE_URL": "http://172.16.16.42:11434",
-		"CLAUDE_CODE_ATTRIBUTION_HEADER": "0",
-		"DISABLE_PROMPT_CACHING": "0"
-
-  },
   
   // ---- Run as non-root vscode user ----
   "remoteUser": "vscode",
@@ -30,9 +21,10 @@
   "workspaceMount": "source=/opt/workspace/finmind-dev,target=/workspace,type=bind,consistency=cached",
 
   "mounts": [
-      "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached",
-      "source=${localWorkspaceFolder}/.claude,target=/home/vscode/.claude,type=bind,consistency=cached",
-      "source=${localWorkspaceFolder}/.claude.json,target=/home/vscode/.claude.json,type=bind,consistency=cached"
+      "source=claude-code-config-${devcontainerId},target=/home/vscode,type=volume",
+      "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached"
+      // "source=${localWorkspaceFolder}/.claude,target=/home/vscode/.claude,type=bind,consistency=cached",
+      // "source=${localWorkspaceFolder}/.claude.json,target=/home/vscode/.claude.json,type=bind,consistency=cached"
   ],
 
   // ---- Forward Jupyter Lab port ----
@@ -46,6 +38,18 @@
   "postCreateCommand": "${containerWorkspaceFolder}/.devcontainer/postCreateCommand.sh ${containerWorkspaceFolder}",
   "postStartCommand": "${containerWorkspaceFolder}/.devcontainer/postStartCommand.sh ${containerWorkspaceFolder} finmind 28888",
 
+	"containerEnv": {
+    // 導入環境變數 (如果需要在容器內部直接定義環境變數，可以在這裡添加)    
+    "CLAUDE_CONFIG_DIR": "/home/raul/.claude",
+		"ANTHROPIC_AUTH_TOKEN": "ollama",
+		"ANTHROPIC_MODEL": "qwen3.5:397b-cloud",
+		"ANTHROPIC_API_KEY": "",
+		"ANTHROPIC_BASE_URL": "http://172.16.16.42:11434",
+		"CLAUDE_CODE_ATTRIBUTION_HEADER": "0",
+		"DISABLE_PROMPT_CACHING": "0"
+
+  },
+
   "customizations": {
     "vscode": {
       "settings": {
@@ -54,7 +58,7 @@
 				// "claudeCode.selectedModel": "minimax-m2.7:cloud",
 				"claudeCode.environmentVariables": [
 					{ "name": "ANTHROPIC_AUTH_TOKEN", "value": "ollama" },
-					{ "name": "ANTHROPIC_MODEL",    "value": "minimax-m2.7:cloud" },
+					{ "name": "ANTHROPIC_MODEL",    "value": "qwen3.5:397b-cloud" },
 					{ "name": "ANTHROPIC_API_KEY",    "value": "" },
 					{ "name": "ANTHROPIC_BASE_URL",   "value": "http://172.16.16.42:11434" },
 					{ "name": "CLAUDE_CODE_ATTRIBUTION_HEADER", "value": "0" },
