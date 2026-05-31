@@ -130,13 +130,7 @@ def run_analysis(stock_id, stock_name, market_type, industry, tick_df, found_dat
     _buf = io.StringIO()
     sys.stdout = _Tee(_orig_stdout, _buf)
 
-    # ── HEAD / TAIL ──────────────────────────────────────
     sep = "═" * 70
-    print(f"\n{sep}")
-    print("▌ HEAD 5")
-    print(tick_df[ALL_COLS].head(5).to_string(index=False))
-    print("\n▌ TAIL 5")
-    print(tick_df[ALL_COLS].tail(5).to_string(index=False))
 
     # ── 基本資訊 ─────────────────────────────────────────
     null_counts = tick_df.isnull().sum()
