@@ -4,7 +4,7 @@ FROM python:3.11-slim
 # xxd: a hexdump tool from vim
 # netcat-openbsd: nc tool
 # procps: ps tool
-RUN apt-get update && apt-get install -y curl sudo git vim xxd netcat-openbsd tree util-linux procps && \
+RUN apt-get update && apt-get install -y curl sudo git vim zstd xxd netcat-openbsd tree util-linux procps && \
     useradd -m -s /bin/bash vscode && \
     echo "vscode ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
     curl -LsSf https://astral.sh/uv/install.sh | sh
