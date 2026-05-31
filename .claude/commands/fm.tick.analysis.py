@@ -372,7 +372,7 @@ def run_analysis(stock_id, stock_name, market_type, industry, tick_df, found_dat
 
     # ── 重點解讀 ─────────────────────────────────────────
     print(f"\n{sep}")
-    print("▌ 重點解讀")
+    print("▌ 重點解讀:逐筆交易")
 
     # 1. 偏態
     print("\n① 偏態分析（skewness / kurtosis）")
@@ -393,11 +393,11 @@ def run_analysis(stock_id, stock_name, market_type, industry, tick_df, found_dat
     print("\n② 中位數 / 眾數分析")
     print(f"  中位數={v_median:.0f} 張，眾數={v_mode:.0f} 張。")
     if v_mode <= 2 and v_median <= 5:
-        print("  典型交易規模極小，市場以散戶零碎買賣為主。")
+        print("  逐筆交易:典型交易規模極小，市場以散戶零碎買賣為主。")
     elif v_mode <= 10:
-        print("  典型成交以小額散戶為主，偶有中型法人進出。")
+        print("  逐筆交易:典型成交以小額散戶為主，偶有中型法人進出。")
     else:
-        print("  眾數偏大，法人或主力參與程度較高。")
+        print("  逐筆交易:眾數偏大，法人或主力參與程度較高。")
 
     # 3. 最大單
     max_row     = tick_df.loc[tick_df["volume"].idxmax()]
@@ -505,20 +505,6 @@ def run_analysis(stock_id, stock_name, market_type, industry, tick_df, found_dat
         _badge = '<span class="badge badge-gray">均衡</span>'
 
     # ── 重點解讀 HTML 變數 ────────────────────────────────────
-    # ① 偏態
-    if v_skew > 2:
-        _i1a = f'<span class="txt-blue">高度右偏（skewness={v_skew:.2f}），大量交易極為稀少，散戶小單主導。</span>'
-    elif v_skew > 0.5:
-        _i1a = f'<span class="txt-blue">中度右偏（skewness={v_skew:.2f}），小單為主但存在法人間歇性大單。</span>'
-    else:
-        _i1a = f'<span class="txt-green">偏態較低（skewness={v_skew:.2f}），交易量分佈較均勻，法人參與度較高。</span>'
-    if v_kurt > 5:
-        _i1b = f'<span class="txt-red">尖峰厚尾（kurtosis={v_kurt:.2f}），極端大單出現頻率高於常態，存在主力佈局跡象。</span>'
-    elif v_kurt > 1:
-        _i1b = f'<span class="txt-amber">輕度尖峰（kurtosis={v_kurt:.2f}），偶有較大單出現。</span>'
-    else:
-        _i1b = f'<span class="txt-blue">平峰（kurtosis={v_kurt:.2f}），量分佈扁平，各規模成交均勻。</span>'
-
     # ② 中位數/眾數（解讀文字；數值已在摘要表格中）
     if v_mode <= 2 and v_median <= 5:
         _i2 = '<span class="txt-blue">典型交易規模極小，市場以散戶零碎買賣為主。</span>'
@@ -658,10 +644,6 @@ def run_analysis(stock_id, stock_name, market_type, industry, tick_df, found_dat
   <div class="card">
     <h2>重點解讀</h2>
     <div class="ins-grid">
-      <div class="ins-item">
-        <div class="ins-no">① 偏態分析</div>
-        <div class="ins-body">{_i1a}<br><br>{_i1b}</div>
-      </div>
       <div class="ins-item">
         <div class="ins-no">② 中位數 / 眾數</div>
         <div class="ins-body">中位數 <strong>{v_median:.0f}</strong> 張，眾數 <strong>{v_mode:.0f}</strong> 張。<br><br>{_i2}</div>
