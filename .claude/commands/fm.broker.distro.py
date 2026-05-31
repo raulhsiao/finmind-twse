@@ -93,12 +93,12 @@ def plot_normal_distribution(top20_buy, top20_sell, sid, stock_name, output_dir=
     if font_available:
         labels = {
             'title': f"{sid} {stock_name} — Top 20 券商買賣分佈常態分佈圖",
-            'buy_hist_title': 'Top 20 買進券商 — 買入股數分佈',
-            'sell_hist_title': 'Top 20 賣出券商 — 賣出股數分佈',
+            'buy_hist_title': 'Top 20 買進券商 — 買入張數分佈',
+            'sell_hist_title': 'Top 20 賣出券商 — 賣出張數分佈',
             'buy_qq_title': 'Top 20 買進券商 — Q-Q 圖',
             'sell_qq_title': 'Top 20 賣出券商 — Q-Q 圖',
-            'buy_xlabel': '買入股數',
-            'sell_xlabel': '賣出股數',
+            'buy_xlabel': '買入張數',
+            'sell_xlabel': '賣出張數',
             'ylabel': '密度',
             'qq_xlabel': '理論分位數',
             'qq_ylabel': '實際分位數',
@@ -110,8 +110,8 @@ def plot_normal_distribution(top20_buy, top20_sell, sid, stock_name, output_dir=
             'sell_hist_title': 'Top 20 Sell Brokers - Sell Volume',
             'buy_qq_title': 'Top 20 Buy Brokers - Q-Q Plot',
             'sell_qq_title': 'Top 20 Sell Brokers - Q-Q Plot',
-            'buy_xlabel': 'Buy Volume (shares)',
-            'sell_xlabel': 'Sell Volume (shares)',
+            'buy_xlabel': 'Buy Volume (lots)',
+            'sell_xlabel': 'Sell Volume (lots)',
             'ylabel': 'Density',
             'qq_xlabel': 'Theoretical Quantiles',
             'qq_ylabel': 'Actual Quantiles',
@@ -138,9 +138,9 @@ def plot_normal_distribution(top20_buy, top20_sell, sid, stock_name, output_dir=
     ax1.hist(buy_data, bins=8, edgecolor='black', alpha=0.7, color='red', density=True)
     x_buy = np.linspace(buy_data.min(), buy_data.max(), 100)
     y_buy = [norm_pdf(x, buy_mean, buy_std) for x in x_buy]
-    ax1.plot(x_buy, y_buy, 'r--', linewidth=2, label=f'Normal\nμ={buy_mean:,.0f}, σ={buy_std:,.0f}')
-    ax1.axvline(buy_mean, color='red', linestyle='-', linewidth=2, label=f'Mean={buy_mean:,.0f}')
-    ax1.axvline(buy_data.median(), color='blue', linestyle=':', linewidth=2, label=f'Median={buy_data.median():,.0f}')
+    ax1.plot(x_buy, y_buy, 'r--', linewidth=2, label=f'Normal\nμ={buy_mean:,.1f}, σ={buy_std:,.1f}')
+    ax1.axvline(buy_mean, color='red', linestyle='-', linewidth=2, label=f'Mean={buy_mean:,.1f}')
+    ax1.axvline(buy_data.median(), color='blue', linestyle=':', linewidth=2, label=f'Median={buy_data.median():,.1f}')
     ax1.set_xlabel(labels['buy_xlabel'])
     ax1.set_ylabel(labels['ylabel'])
     ax1.set_title(labels['buy_hist_title'])
@@ -152,9 +152,9 @@ def plot_normal_distribution(top20_buy, top20_sell, sid, stock_name, output_dir=
     ax2.hist(sell_data, bins=8, edgecolor='black', alpha=0.7, color='green', density=True)
     x_sell = np.linspace(sell_data.min(), sell_data.max(), 100)
     y_sell = [norm_pdf(x, sell_mean, sell_std) for x in x_sell]
-    ax2.plot(x_sell, y_sell, 'g--', linewidth=2, label=f'Normal\nμ={sell_mean:,.0f}, σ={sell_std:,.0f}')
-    ax2.axvline(sell_mean, color='green', linestyle='-', linewidth=2, label=f'Mean={sell_mean:,.0f}')
-    ax2.axvline(sell_data.median(), color='blue', linestyle=':', linewidth=2, label=f'Median={sell_data.median():,.0f}')
+    ax2.plot(x_sell, y_sell, 'g--', linewidth=2, label=f'Normal\nμ={sell_mean:,.1f}, σ={sell_std:,.1f}')
+    ax2.axvline(sell_mean, color='green', linestyle='-', linewidth=2, label=f'Mean={sell_mean:,.1f}')
+    ax2.axvline(sell_data.median(), color='blue', linestyle=':', linewidth=2, label=f'Median={sell_data.median():,.1f}')
     ax2.set_xlabel(labels['sell_xlabel'])
     ax2.set_ylabel(labels['ylabel'])
     ax2.set_title(labels['sell_hist_title'])
@@ -226,11 +226,13 @@ def analyze_broker_distribution(sid, stock_name, days=60):
 
     df = pd.DataFrame(all_data)
 
-    # 依券商彙總
+    # 依券商彙總，轉換為張數 (1張 = 1000股)
     broker_stats = df.groupby("securities_trader").agg(
         buy_total=("buy", "sum"),
         sell_total=("sell", "sum")
     ).reset_index()
+    broker_stats["buy_total"] = broker_stats["buy_total"] / 1000
+    broker_stats["sell_total"] = broker_stats["sell_total"] / 1000
 
     # 全市場成交量
     all_volume_buy = broker_stats["buy_total"].sum()
@@ -275,17 +277,17 @@ def analyze_broker_distribution(sid, stock_name, days=60):
     print("=" * 70)
     print("=" * 70)
     print(f"\n全市場總成交量:")
-    print(f"  all.volume.buy  = {all_volume_buy:>15,} 股")
-    print(f"  all.volume.sell = {all_volume_sell:>15,} 股")
+    print(f"  all.volume.buy  = {all_volume_buy:>15,.1f} 張")
+    print(f"  all.volume.sell = {all_volume_sell:>15,.1f} 張")
     print(f"\nTop 20 買進券商:")
-    print(f"  top20.volume.buy  = {top20_volume_buy:>15,} 股")
-    print(f"  top20.volume.sell = {top20_volume_sell:>15,} 股")
+    print(f"  top20.volume.buy  = {top20_volume_buy:>15,.1f} 張")
+    print(f"  top20.volume.sell = {top20_volume_sell:>15,.1f} 張")
     print(f"\nTop 20 賣出券商:")
-    print(f"  top20.volume.buy  = {top20_volume_buy_2:>15,} 股")
-    print(f"  top20.volume.sell = {top20_volume_sell_2:>15,} 股")
+    print(f"  top20.volume.buy  = {top20_volume_buy_2:>15,.1f} 張")
+    print(f"  top20.volume.sell = {top20_volume_sell_2:>15,.1f} 張")
     print(f"\n其他券商:")
-    print(f"  other.volume.buy  = {other_volume_buy:>15,} 股")
-    print(f"  other.volume.sell = {other_volume_sell:>15,} 股")
+    print(f"  other.volume.buy  = {other_volume_buy:>15,.1f} 張")
+    print(f"  other.volume.sell = {other_volume_sell:>15,.1f} 張")
     print(f"\n佔比分析:")
     print(f"  top20.volume.buy / all.volume.buy   = {pct_top20_buy:>6.2f}%")
     print(f"  top20.volume.sell / all.volume.sell = {pct_top20_sell:>6.2f}%")
@@ -293,46 +295,46 @@ def analyze_broker_distribution(sid, stock_name, days=60):
     print("\n" + "=" * 70)
     print("  Top 20 買進券商明細 (按買進量排名)")
     print("=" * 70)
-    print(f"{'排名':<4} {'券商':<14} {'買進股數':>14} {'賣出股數':>14} {'買賣超':>14}")
+    print(f"{'排名':<4} {'券商':<14} {'買進(張)':>14} {'賣出(張)':>14} {'買賣超(張)':>14}")
     print("-" * 70)
     for i, (_, row) in enumerate(top20_buy.iterrows(), 1):
         net = row["buy_total"] - row["sell_total"]
         sign = "+" if net >= 0 else ""
-        print(f"{i:<4} {row['securities_trader']:<14} {row['buy_total']:>14,} {row['sell_total']:>14,} {sign}{net:>13,}")
+        print(f"{i:<4} {row['securities_trader']:<14} {row['buy_total']:>14,.1f} {row['sell_total']:>14,.1f} {sign}{net:>13,.1f}")
 
     print("\n" + "=" * 70)
     print("  Top 20 賣出券商明細 (按賣出量排名)")
     print("=" * 70)
-    print(f"{'排名':<4} {'券商':<14} {'買進股數':>14} {'賣出股數':>14} {'買賣超':>14}")
+    print(f"{'排名':<4} {'券商':<14} {'買進(張)':>14} {'賣出(張)':>14} {'買賣超(張)':>14}")
     print("-" * 70)
     for i, (_, row) in enumerate(top20_sell.iterrows(), 1):
         net = row["buy_total"] - row["sell_total"]
         sign = "+" if net >= 0 else ""
-        print(f"{i:<4} {row['securities_trader']:<14} {row['buy_total']:>14,} {row['sell_total']:>14,} {sign}{net:>13,}")
+        print(f"{i:<4} {row['securities_trader']:<14} {row['buy_total']:>14,.1f} {row['sell_total']:>14,.1f} {sign}{net:>13,.1f}")
 
     print("\n" + "=" * 70)
-    print("  Top 20 買進券商 — 買入股數常態分佈統計")
+    print("  Top 20 買進券商 — 買入張數常態分佈統計")
     print("=" * 70)
-    print(f"  平均值 (Mean)   : {buy_mean:>15,.0f} 股")
-    print(f"  標準差 (Std Dev): {buy_std:>15,.0f} 股")
-    print(f"  中位數 (Median) : {buy_median:>15,.0f} 股")
-    print(f"  最小值 (Min)    : {buy_min:>15,.0f} 股")
-    print(f"  最大值 (Max)    : {buy_max:>15,.0f} 股")
+    print(f"  平均值 (Mean)   : {buy_mean:>15,.1f} 張")
+    print(f"  標準差 (Std Dev): {buy_std:>15,.1f} 張")
+    print(f"  中位數 (Median) : {buy_median:>15,.1f} 張")
+    print(f"  最小值 (Min)    : {buy_min:>15,.1f} 張")
+    print(f"  最大值 (Max)    : {buy_max:>15,.1f} 張")
     print(f"\n  常態分佈區間:")
-    print(f"    Mean ± 1σ: {max(0, buy_mean - buy_std):>12,.0f} ~ {buy_mean + buy_std:>12,.0f} 股")
-    print(f"    Mean ± 2σ: {max(0, buy_mean - 2*buy_std):>12,.0f} ~ {buy_mean + 2*buy_std:>12,.0f} 股")
+    print(f"    Mean ± 1σ: {max(0, buy_mean - buy_std):>12,.1f} ~ {buy_mean + buy_std:>12,.1f} 張")
+    print(f"    Mean ± 2σ: {max(0, buy_mean - 2*buy_std):>12,.1f} ~ {buy_mean + 2*buy_std:>12,.1f} 張")
 
     print("\n" + "=" * 70)
-    print("  Top 20 賣出券商 — 賣出股數常態分佈統計")
+    print("  Top 20 賣出券商 — 賣出張數常態分佈統計")
     print("=" * 70)
-    print(f"  平均值 (Mean)   : {sell_mean:>15,.0f} 股")
-    print(f"  標準差 (Std Dev): {sell_std:>15,.0f} 股")
-    print(f"  中位數 (Median) : {sell_median:>15,.0f} 股")
-    print(f"  最小值 (Min)    : {sell_min:>15,.0f} 股")
-    print(f"  最大值 (Max)    : {sell_max:>15,.0f} 股")
+    print(f"  平均值 (Mean)   : {sell_mean:>15,.1f} 張")
+    print(f"  標準差 (Std Dev): {sell_std:>15,.1f} 張")
+    print(f"  中位數 (Median) : {sell_median:>15,.1f} 張")
+    print(f"  最小值 (Min)    : {sell_min:>15,.1f} 張")
+    print(f"  最大值 (Max)    : {sell_max:>15,.1f} 張")
     print(f"\n  常態分佈區間:")
-    print(f"    Mean ± 1σ: {max(0, sell_mean - sell_std):>12,.0f} ~ {sell_mean + sell_std:>12,.0f} 股")
-    print(f"    Mean ± 2σ: {max(0, sell_mean - 2*sell_std):>12,.0f} ~ {sell_mean + 2*sell_std:>12,.0f} 股")
+    print(f"    Mean ± 1σ: {max(0, sell_mean - sell_std):>12,.1f} ~ {sell_mean + sell_std:>12,.1f} 張")
+    print(f"    Mean ± 2σ: {max(0, sell_mean - 2*sell_std):>12,.1f} ~ {sell_mean + 2*sell_std:>12,.1f} 張")
 
     # 繪製常態分佈圖
     print("\n" + "=" * 70)
