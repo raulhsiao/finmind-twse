@@ -17,6 +17,6 @@ uv venv finmind
 # source finmind/bin/activate 
 uv pip install -r /workspace/packages/FinMind/requirements.txt \
    --python finmind
-uv pip install finmind jupyterlab requests matplotlib \
+uv pip install finmind jupyterlab requests matplotlib tqdm \
    --python finmind
 
