@@ -56,6 +56,15 @@
 				// "claudeCode.disableLoginPrompt": true,
 				// "claudeCode.preferredLocation": "panel",
 				// "claudeCode.selectedModel": "minimax-m2.7:cloud",
+        
+        // kimi-k2.6:cloud (context:256K, parameters:1.04T)
+        // qwen3.5:397b-cloud (context:256K, parameters:397B), good for Claude code!!! 3.5 starts
+        // deepseek-v4-pro:cloud (context:1M, parameters:1.6T)
+        // deepseek-v3.2:cloud (context:160K, parameters:671B)
+        // glm-5.1:cloud (context:198K, parameters:756T)
+        // glm-5:cloud (context:198K, parameters:756T)
+        // glm-4.7:cloud (context:198K, parameters:357B)
+        // gemma4:31b-cloud (context:256K, parameters:31B)
 				"claudeCode.environmentVariables": [
 					{ "name": "ANTHROPIC_AUTH_TOKEN", "value": "ollama" },
 					{ "name": "ANTHROPIC_MODEL",    "value": "qwen3.5:397b-cloud" },
