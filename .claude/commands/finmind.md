@@ -44,6 +44,11 @@ These datasets do NOT use `/data` — they have dedicated endpoints:
 
 Check usage: `GET https://api.web.finmindtrade.com/v2/user_info` (Bearer token) — returns `user_count` and `api_request_limit`. HTTP 402 means quota exceeded.
 
+### More information
+- Dataset schema: /workspace/.claude/commands/finmind-references/datasets.md
+- API & Dataset specification: /workspace/.claude/commands/finmind-references/llms-full.md
+- Brief description of API: /workspace/.claude/commands/finmind-references/llms.md
+
 ## How to Query
 
 Use Python with `requests` and `pandas`. This is the standard pattern:
