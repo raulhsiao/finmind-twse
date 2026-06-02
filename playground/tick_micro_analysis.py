@@ -468,38 +468,34 @@ def create_analysis_chart(df: pd.DataFrame, stock_id: str, stock_name: str,
     fig.suptitle(f"{stock_id} {stock_name} 逐筆交易微觀市場分析", fontsize=16, fontweight="bold")
     fig.patch.set_facecolor("white")
 
-    # === 取樣策略 ===
+    # === 使用原始資料，不進行降解析 ===
+    # 圖 1 和圖 2 使用完整原始資料繪製
+    times_raw = df["time_only"].tolist()
+    prices_raw = df["deal_price"].tolist()
+    vwap_raw = vwap_series.tolist()
+    cum_buy_raw = df["cum_buy"].tolist()
+    cum_sell_raw = df["cum_sell"].tolist()
     n_points = len(df)
-    if n_points <= 200:
-        sample_indices = list(range(n_points))
-    else:
-        step = max(1, n_points // 150)
-        sample_indices = list(range(0, n_points, step))
-        if n_points - 1 not in sample_indices:
-            sample_indices.append(n_points - 1)
 
-    sample_times = df.iloc[sample_indices]["time_only"].tolist()
-    sample_times_raw = df["time_only"].tolist()
-    sample_prices = df.iloc[sample_indices]["deal_price"].tolist()
-    sample_vwaps = vwap_series.iloc[sample_indices].tolist()
-    sample_cum_buy = df.iloc[sample_indices]["cum_buy"].tolist()
-    sample_cum_sell = df.iloc[sample_indices]["cum_sell"].tolist()
-
-    # === X 軸標籤優化 ===
-    def get_x_tick_indices(times, max_ticks=8):
+    # === X 軸標籤優化：只顯示關鍵時間點，避免標籤過多 ===
+    def get_x_tick_indices(times, max_ticks=10):
+        """
+        取得 X 軸刻度索引，只顯示關鍵時間點（開盤、收盤、整點）
+        預設最多 10 個標籤，避免過於擁擠
+        """
         n = len(times)
         if n <= max_ticks:
             return list(range(n))
 
         key_indices = set()
 
-        # 開盤 (09:00)
+        # 開盤 (09:00) - 找最接近的
         for i, t in enumerate(times):
             if t and t.startswith("09:00"):
                 key_indices.add(i)
                 break
 
-        # 收盤 (13:30)
+        # 收盤 (13:30) - 找最接近的
         for i in range(n - 1, -1, -1):
             if times[i] and times[i].startswith("13:30"):
                 key_indices.add(i)
@@ -508,14 +504,14 @@ def create_analysis_chart(df: pd.DataFrame, stock_id: str, stock_name: str,
                 key_indices.add(i)
                 break
 
-        # 整點時刻
+        # 整點時刻 (10:00, 11:00, 12:00, 13:00)
         for hour in [10, 11, 12, 13]:
             for i, t in enumerate(times):
                 if t and t.startswith(f"{hour:02d}:00"):
                     key_indices.add(i)
                     break
 
-        # 均勻補充
+        # 均勻補充至 max_ticks
         remaining = max_ticks - len(key_indices)
         if remaining > 0 and n > max_ticks:
             step = n // (remaining + 1)
@@ -527,41 +523,46 @@ def create_analysis_chart(df: pd.DataFrame, stock_id: str, stock_name: str,
 
         return sorted(key_indices)
 
-    x_tick_indices = get_x_tick_indices(sample_times, max_ticks=8)
-    x_tick_labels = [sample_times[i] for i in x_tick_indices]
+    x_tick_indices = get_x_tick_indices(times_raw, max_ticks=10)
+    x_tick_labels = [times_raw[i] for i in x_tick_indices]
     x_tick_labels = [t[:5] if t and len(t) >= 5 else t for t in x_tick_labels]
 
-    # === 子圖 1：價格與 VWAP 走勢 ===
+    # === 子圖 1：價格與 VWAP 走勢（使用原始資料，不降解析）===
     ax1 = axes[0]
     ax1.set_facecolor("white")
 
-    ax1.plot(sample_times, sample_prices, "k-", linewidth=0.8, label="成交價", alpha=0.7)
-    ax1.plot(sample_times, sample_vwaps, "r-", linewidth=1.5, label="VWAP")
+    # 成交價折線圖 - 使用完整原始資料
+    ax1.plot(range(n_points), prices_raw, "k-", linewidth=0.5, label="成交價", alpha=0.6)
+
+    # VWAP 紅線 - 使用完整原始資料
+    ax1.plot(range(n_points), vwap_raw, "r-", linewidth=1.2, label="VWAP")
+
+    # 最終 VWAP 水平虛線
     ax1.axhline(y=final_vwap, color="r", linestyle="--", linewidth=1, alpha=0.5,
                 label=f"最終 VWAP: {final_vwap:.2f}")
 
     ax1.set_ylabel("價格 (元)", fontsize=11)
-    ax1.set_title(f"{stock_id} {stock_name} 日內價格與 VWAP 走勢", fontsize=12)
+    ax1.set_title(f"{stock_id} {stock_name} 日內價格與 VWAP 走勢（原始資料，共 {n_points:,} 筆）", fontsize=12)
     ax1.legend(loc="upper left", fontsize=9)
     ax1.grid(True, alpha=0.3)
     ax1.set_xticks(x_tick_indices)
     ax1.set_xticklabels(x_tick_labels, rotation=45, ha="right", fontsize=8)
 
-    # === 子圖 2：累積內外盤走勢 ===
+    # === 子圖 2：累積內外盤走勢（使用原始資料，不降解析）===
     ax2 = axes[1]
     ax2.set_facecolor("white")
 
-    ax2.plot(sample_times, sample_cum_buy, "r-", linewidth=1.2, label="累積買盤 (外盤)")
-    ax2.plot(sample_times, sample_cum_sell, "g-", linewidth=1.2, label="累積賣盤 (內盤)")
-    ax2.fill_between(range(len(sample_times)), sample_cum_buy, sample_cum_sell,
-                     alpha=0.3, where=(np.array(sample_cum_buy) >= np.array(sample_cum_sell)),
+    ax2.plot(range(n_points), cum_buy_raw, "r-", linewidth=1.2, label="累積買盤 (外盤)")
+    ax2.plot(range(n_points), cum_sell_raw, "g-", linewidth=1.2, label="累積賣盤 (內盤)")
+    ax2.fill_between(range(n_points), cum_buy_raw, cum_sell_raw,
+                     alpha=0.3, where=(np.array(cum_buy_raw) >= np.array(cum_sell_raw)),
                      color="red")
-    ax2.fill_between(range(len(sample_times)), sample_cum_buy, sample_cum_sell,
-                     alpha=0.3, where=(np.array(sample_cum_buy) < np.array(sample_cum_sell)),
+    ax2.fill_between(range(n_points), cum_buy_raw, cum_sell_raw,
+                     alpha=0.3, where=(np.array(cum_buy_raw) < np.array(cum_sell_raw)),
                      color="green")
 
     ax2.set_ylabel("累積成交量 (股)", fontsize=11)
-    ax2.set_title("累積內外盤走勢", fontsize=12)
+    ax2.set_title(f"累積內外盤走勢（原始資料，共 {n_points:,} 筆）", fontsize=12)
     ax2.legend(loc="upper left", fontsize=9)
     ax2.grid(True, alpha=0.3)
     ax2.set_xticks(x_tick_indices)
@@ -1351,8 +1352,9 @@ def main(stock_id: str = None, stock_name: str = None):
 
     # 6. 建立圖表
     print(f"\n[步驟 5] 建立分析圖表...")
-    date_str = datetime.now().strftime("%Y%m%d")
-    chart_path = str(PLAYGROUND_DIR / f"{date_str}_{stock_id}_chart.png")
+    # 使用交易日日期而非當日日期作為檔案名稱
+    trade_date_str = trade_date.replace("-", "")
+    chart_path = str(PLAYGROUND_DIR / f"{trade_date_str}_{stock_id}_chart.png")
     create_analysis_chart(df, stock_id, stock_name, vwap_series, final_vwap, price_levels, chart_path)
 
     # 7. 生成 Markdown 報告
@@ -1364,7 +1366,7 @@ def main(stock_id: str = None, stock_name: str = None):
         final_vwap, chart_path
     )
 
-    md_path = LOGS_DIR / f"{date_str}_{stock_id}_analysis.md"
+    md_path = LOGS_DIR / f"{trade_date_str}_{stock_id}_analysis.md"
     with open(md_path, "w", encoding="utf-8") as f:
         f.write(report_md)
     print(f"  → Markdown 報告：{md_path}")
@@ -1378,7 +1380,7 @@ def main(stock_id: str = None, stock_name: str = None):
         final_vwap, chart_path
     )
 
-    html_path = PLAYGROUND_DIR / f"{date_str}_{stock_id}_analysis.html"
+    html_path = PLAYGROUND_DIR / f"{trade_date_str}_{stock_id}_analysis.html"
     with open(html_path, "w", encoding="utf-8") as f:
         f.write(html_content)
     print(f"  → HTML 報告：{html_path}")
